@@ -1,47 +1,42 @@
-import os
-import sys
 import subprocess
+import sys
 
-# ANSI color codes
-RED = "\033[1;97;41m"
-GREEN = "\033[1;97;42m"
-RESET = "\033[0;37m"
-DIM = "\033[2m"
-
-def ping_host(domain):
+def ping(domain):
     try:
+        # Run ping and capture both stdout and stderr
         result = subprocess.run(
-            ["ping", "-c", "2", domain],
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL
+            ["ping", "-n", "2", domain],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE
         )
         return result.returncode == 0
-    except Exception:
+    except Exception as e:
+        print(f"Error pinging {domain}: {e}")
         return False
 
 def main():
     if len(sys.argv) < 2:
-        print(f"{RED} No target supplied {RESET}")
+        print("Usage: python3 bulk_ping.py domains.txt")
         return
 
     target_file = sys.argv[1]
 
-    if not os.path.isfile(target_file):
-        print(f"{RED} File '{target_file}' not found {RESET}")
-        return
+    try:
+        with open(target_file, 'r') as f, open("Pingstatus.md", 'a') as out:
+            for line in f:
+                domain = line.strip()
+                if not domain:
+                    continue
 
-    print(f"{DIM}{RED} Make sure you have added new line in the ping file {RESET}")
-    print("Initiating Ping...\n")
+                is_up = ping(domain)
 
-    with open(target_file, 'r') as f, open("Pingstatus.md", 'a') as out_file:
-        for line in f:
-            domain = line.strip()
-            if not domain:
-                continue
-
-            if ping_host(domain):
-                print(f"{GREEN} [+] Host [{domain}] is up {RESET}")
-                out_file.write(domain + '\n')
+                if is_up:
+                    print(f"[+] Host {domain} is up")
+                    out.write(f"{domain}\n")
+                else:
+                    print(f"[-] Host {domain} is down or unreachable")
+    except FileNotFoundError:
+        print(f"File '{target_file}' not found.")
 
 if __name__ == "__main__":
     main()
