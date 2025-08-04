@@ -1,6 +1,6 @@
 # Automation tool for Bulk_Ping
 
-```bash
+
 if [ -n "$1" ]; then 
 	target=$1
 		echo "\e[5m\e[41m\033[1;97m Make sure you have added new line in the ping file \033[0;37m"
@@ -19,5 +19,5 @@ if [ -n "$1" ]; then
 else
 	echo "\e[5m\e[41m\033[1;97m No target supplied \033[0;37m"
 fi
-```
+
 
